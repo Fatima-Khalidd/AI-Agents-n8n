@@ -1,0 +1,244 @@
+{
+  "name": "HTTP nodes & API calls",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6594f250-3277-4e20-b36a-5a3231019222",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        16
+      ],
+      "id": "4f031174-a293-4425-b429-1bbdbe83a646",
+      "name": "Wait 30 sec",
+      "webhookId": "d98261d4-e076-48ab-a19a-9edab6aa0085"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.firecrawl.dev/v2/extract/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        624,
+        16
+      ],
+      "id": "f336c7f5-3044-4c09-abff-42aed78e3b7e",
+      "name": "firecrawl HTTP GET request status",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "LDKK7IlHt3uiXoB8",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "68bf07a7-6aa2-4136-8fe6-2c3ffa53ed6c",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        32
+      ],
+      "id": "6216a88d-57cc-422e-b5ec-050177b50a43",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "fa23-bse-049@cuilahore.edu.pk",
+        "subject": "Extracted Data",
+        "emailType": "text",
+        "message": "={{ $json.success }}{{ $json.status }}{{ $json.expiresAt }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        -64
+      ],
+      "id": "782746f5-7d2b-49fc-a80c-828cacb54f2a",
+      "name": "Send a message",
+      "webhookId": "61247d56-b028-4121-b35d-7c5cafe6c2e2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7bI92ymgAk7nfsYs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"urls\": [\n    \"https://techcrunch.com/tag/generative-ai/\"\n  ],\n  \"scrapeOptions\": {\n    \"formats\": [\"markdown\"],\n    \"onlyMainContent\": true,\n    \"maxAge\": 172800000,\n    \"headers\": {},\n    \"waitFor\": 0,\n    \"mobile\": false,\n    \"skipTlsVerification\": true,\n    \"timeout\": 30000,\n    \"parsers\": [\"pdf\"],\n    \"location\": {\n      \"country\": \"US\"\n    },\n    \"removeBase64Images\": true,\n    \"blockAds\": true,\n    \"proxy\": \"auto\",\n    \"storeInCache\": true\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3a589ed4-5bd3-4d4a-840a-abf59bebe2cb",
+      "name": "Firecrawl Exract",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "liLMZr3ZZ0qwAw3F",
+          "name": "open weather map"
+        },
+        "httpBearerAuth": {
+          "id": "LDKK7IlHt3uiXoB8",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        128
+      ],
+      "id": "a90f179f-a302-4265-a568-8d42bbab6cf7",
+      "name": "Wait",
+      "webhookId": "b1617be8-7b83-445f-8625-1c2701ecf339"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl Exract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 30 sec": {
+      "main": [
+        [
+          {
+            "node": "firecrawl HTTP GET request status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "firecrawl HTTP GET request status": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl Exract": {
+      "main": [
+        [
+          {
+            "node": "Wait 30 sec",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "firecrawl HTTP GET request status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "d5024488-6de3-46cc-9387-daa683857c4a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c06b7a2dc6dfa5903c89781a06ed2f49d1eca0d898a2b54a2fdc447a3a9382e2"
+  },
+  "id": "cn6DrqUZAwpDVwz1Xop2w",
+  "tags": []
+}
